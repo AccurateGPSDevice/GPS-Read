@@ -1,6 +1,7 @@
 #include <SoftwareSerial.h>
 #include "TinyGPSPlus.h"
 #include <math.h>
+#include "Smooth.h"
 
 #define EARTH_RADIUS 6368.061
 
@@ -57,6 +58,8 @@ void displayInfo()
     Serial.print("\t");                                                     // lattitude and longitude
     Serial.print(gps.location.lng(), 6);
     Serial.print("\t");
+    
+    smooth();
 
   }
   else
@@ -66,4 +69,23 @@ void displayInfo()
 
 
   Serial.println();
+}
+
+void smooth()
+{
+  float accuracy = 1;
+  float variance = 1;
+  float K = variance / (variance + accuracy * accuracy);
+  // apply K
+  double smoothLat, smoothLng;
+  smoothLat += 1 * (gps.location.lat() - smoothLat);
+  smoothLng += 1 * (gps.location.lng() - smoothLng);
+
+  //  smoothing lattitude and longitude
+  smoothLat = smoothLat * 0.3 + smoothLat * .4 + smoothLat * .3;
+  smoothLng = smoothLng * 0.3 + smoothLng * .4 + smoothLng * .3;
+
+  Serial.print(smoothLat, 6);
+  Serial.print("\t");
+  Serial.println(smoothLng, 6);
 }
